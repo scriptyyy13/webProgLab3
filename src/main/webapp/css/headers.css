@@ -1,0 +1,45 @@
+body {
+    font-family: "Cascadia Mono", monospace;
+    padding: 25px;
+    background: #f4f5f7;
+    color: #333;
+    text-align: center;
+}
+
+h2 {
+    color: #2c3e50;
+    margin-bottom: 15px;
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+    max-width: 650px;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    margin-left: auto;
+    margin-right: auto;
+}
+
+th, td {
+    border: 1px solid #cbd5e0;
+    padding: 8px 12px;
+    text-align: left;
+}
+
+th {
+    background: #edf2f7;
+    font-weight: bold;
+}
+
+a {
+    display: inline-block;
+    margin-top: 15px;
+    color: #4a5568;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+a:hover {
+    text-decoration: underline;
+}
