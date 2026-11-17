@@ -124,7 +124,7 @@ function labApp() {
                     const y = parseFloat(tds[1].textContent.replace(',', '.'));
                     const ptR = parseFloat(tds[2].textContent.replace(',', '.'));
                     const hit = tds[3].classList.contains("hit-true") || tds[3].textContent.includes("пробитие");
-                    if (!isNaN(x) && !isNaN(y)) {
+                    if (!isNaN(x) && !isNaN(y) && !isNaN(ptR)) {
                         list.push({ x, y, r: ptR, hit });
                     }
                 }
@@ -230,7 +230,8 @@ function labApp() {
             const mathX = (((clickX - centerX) / this.scale) * rNum).toFixed(2);
             const mathY = (((centerY - clickY) / this.scale) * rNum).toFixed(2);
 
-            htmx.ajax('GET', `controller?x=${mathX}&y=${mathY}&r=${this.r}`, {
+            htmx.ajax('POST', 'controller', {
+                values: { x: mathX, y: mathY, r: this.r },
                 target: '#results-body',
                 swap: 'afterbegin'
             });
@@ -371,12 +372,9 @@ function labApp() {
         // пинг сервера
         pingServer() {
             const sendTime = Date.now();
-            fetch('controller?action=ping')
+            fetch('controller', { method: 'HEAD' })
                 .then(res => {
-                    if (!res.ok) throw new Error("Offline");
-                    return res.json();
-                })
-                .then(data => {
+                    if (!res.ok) throw new Error("offline");
                     const receiveTime = Date.now();
                     const rtt = receiveTime - sendTime;
 

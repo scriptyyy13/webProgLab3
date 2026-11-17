@@ -59,7 +59,7 @@
             <div class="card form-card">
                 <h2>Параметры точки</h2>
                 <form id="point-form"
-                      hx-get="controller"
+                      hx-post="controller"
                       hx-target="#results-body"
                       hx-swap="afterbegin"
                       @submit="validateForm($event)"
@@ -111,7 +111,7 @@
                         <button type="button"
                                 class="btn-clear"
                                 id="clear-btn"
-                                hx-get="controller?action=clear"
+                                hx-delete="controller"
                                 hx-target="#results-body"
                                 hx-swap="innerHTML"
                                 @htmx:config-request.stop

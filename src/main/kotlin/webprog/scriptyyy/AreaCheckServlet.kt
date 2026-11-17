@@ -24,7 +24,7 @@ class AreaCheckServlet : HttpServlet() {
         }
     }
 
-    override fun doGet(req: HttpServletRequest, resp: HttpServletResponse) {
+    override fun doPost(req: HttpServletRequest, resp: HttpServletResponse) {
         val startTime = System.nanoTime()
 
         // парсим параметры и меняем запятую на точку если надо

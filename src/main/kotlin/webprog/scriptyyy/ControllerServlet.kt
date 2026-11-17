@@ -8,34 +8,27 @@ import jakarta.servlet.http.HttpServletResponse
 @WebServlet(name = "ControllerServlet", urlPatterns = ["", "/controller"])
 class ControllerServlet : HttpServlet() {
 
+    // отдаем саму страницу
     override fun doGet(req: HttpServletRequest, resp: HttpServletResponse) {
-        val action = req.getParameter("action")
+        req.getRequestDispatcher("/index.jsp").forward(req, resp)
+    }
 
-        // проверка доступности сервера
-        if ("ping" == action) {
-            resp.contentType = "application/json;charset=UTF-8"
-            resp.writer.print("""{"status":"ok","serverUnixTime":${System.currentTimeMillis()}}""")
-            return
-        }
+    // отправка новой точки на проверку
+    override fun doPost(req: HttpServletRequest, resp: HttpServletResponse) {
+        req.getRequestDispatcher("/check").forward(req, resp)
+    }
 
-        // очистка сохраненных точек
-        if ("clear" == action) {
-            servletContext.removeAttribute("results")
-            resp.contentType = "text/plain;charset=UTF-8"
-            resp.writer.print("")
-            return
-        }
+    // очистка списка точек
+    override fun doDelete(req: HttpServletRequest, resp: HttpServletResponse) {
+        servletContext.removeAttribute("results")
+        resp.status = HttpServletResponse.SC_OK
+        resp.contentType = "text/plain;charset=UTF-8"
+        resp.writer.print("")
+    }
 
-        val x = req.getParameter("x")
-        val y = req.getParameterValues("y")
-        val r = req.getParameter("r")
-
-        // если есть координаты, передаем запрос на проверку
-        if (x != null || y != null || r != null) {
-            req.getRequestDispatcher("/check").forward(req, resp)
-        } else {
-            // иначе просто открываем страницу с формой
-            req.getRequestDispatcher("/index.jsp").forward(req, resp)
-        }
+    // проверка доступности сервера без тела ответа
+    override fun doHead(req: HttpServletRequest, resp: HttpServletResponse) {
+        resp.status = HttpServletResponse.SC_OK
+        resp.contentType = "text/plain;charset=UTF-8"
     }
 }
