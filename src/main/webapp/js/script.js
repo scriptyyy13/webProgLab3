@@ -5,7 +5,8 @@ let lastFormSoundTime = 0;
 function playSound(name) {
     const audio = new Audio(`sounds/${name}.mp3`);
     audio.volume = 0.6;
-    audio.play().catch(() => {});
+    audio.play().catch(() => {
+    });
 }
 
 // звук ошибки ввода с кулдауном
@@ -125,7 +126,7 @@ function labApp() {
                     const ptR = parseFloat(tds[2].textContent.replace(',', '.'));
                     const hit = tds[3].classList.contains("hit-true") || tds[3].textContent.includes("пробитие");
                     if (!isNaN(x) && !isNaN(y) && !isNaN(ptR)) {
-                        list.push({ x, y, r: ptR, hit });
+                        list.push({x, y, r: ptR, hit});
                     }
                 }
             });
@@ -231,7 +232,7 @@ function labApp() {
             const mathY = (((centerY - clickY) / this.scale) * rNum).toFixed(2);
 
             htmx.ajax('POST', 'controller', {
-                values: { x: mathX, y: mathY, r: this.r },
+                values: {x: mathX, y: mathY, r: this.r},
                 target: '#results-body',
                 swap: 'afterbegin'
             });
@@ -318,15 +319,15 @@ function labApp() {
             const rHalfVal = this.r ? (r / 2) : "R/2";
 
             const labels = [
-                { x: centerX + this.scale, y: centerY + 14, text: rVal },
-                { x: centerX + this.scale / 2, y: centerY + 14, text: rHalfVal },
-                { x: centerX - this.scale / 2, y: centerY + 14, text: "-" + rHalfVal },
-                { x: centerX - this.scale, y: centerY + 14, text: "-" + rVal },
+                {x: centerX + this.scale, y: centerY + 14, text: rVal},
+                {x: centerX + this.scale / 2, y: centerY + 14, text: rHalfVal},
+                {x: centerX - this.scale / 2, y: centerY + 14, text: "-" + rHalfVal},
+                {x: centerX - this.scale, y: centerY + 14, text: "-" + rVal},
 
-                { x: centerX + 8, y: centerY - this.scale + 4, text: rVal },
-                { x: centerX + 8, y: centerY - this.scale / 2 + 4, text: rHalfVal },
-                { x: centerX + 8, y: centerY + this.scale / 2 + 4, text: "-" + rHalfVal },
-                { x: centerX + 8, y: centerY + this.scale + 4, text: "-" + rVal }
+                {x: centerX + 8, y: centerY - this.scale + 4, text: rVal},
+                {x: centerX + 8, y: centerY - this.scale / 2 + 4, text: rHalfVal},
+                {x: centerX + 8, y: centerY + this.scale / 2 + 4, text: "-" + rHalfVal},
+                {x: centerX + 8, y: centerY + this.scale + 4, text: "-" + rVal}
             ];
 
             ctx.strokeStyle = "#4a5568";
@@ -372,7 +373,7 @@ function labApp() {
         // пинг сервера
         pingServer() {
             const sendTime = Date.now();
-            fetch('controller', { method: 'HEAD' })
+            fetch('controller', {method: 'HEAD'})
                 .then(res => {
                     if (!res.ok) throw new Error("offline");
                     const receiveTime = Date.now();

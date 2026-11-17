@@ -68,7 +68,7 @@ main {
     border: 1px solid #dcdfe6;
     border-radius: 4px;
     padding: 20px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .canvas-card {

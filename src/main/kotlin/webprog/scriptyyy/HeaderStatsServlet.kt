@@ -12,6 +12,7 @@ class HeaderStatsServlet : HttpServlet() {
 
     override fun doGet(req: HttpServletRequest, resp: HttpServletResponse) {
         val context = servletContext
+
         @Suppress("UNCHECKED_CAST")
         val headerStats = context.getAttribute("headerStats") as? ConcurrentHashMap<String, AtomicLong>
 
