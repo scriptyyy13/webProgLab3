@@ -175,7 +175,7 @@
     </script>
 
     <footer id="footer-info">
-        Это подвал | Но тут не будет шутки про детей
+        Это подвал | Но тут не будет шутки про детей, зато тут есть <a href="headers" style="color: inherit;">статистика заголовков</a>
     </footer>
 
     <script src="js/script.js"></script>
