@@ -55,7 +55,7 @@ class HeaderStatsServlet : HttpServlet() {
 
         out.println("""
                 <br>
-                <a href="${req.contextPath}/controller">назад к приложению</a>
+                <a href="${req.contextPath}/">на главную</a>
             </body>
             </html>
         """.trimIndent())
