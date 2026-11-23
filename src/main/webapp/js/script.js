@@ -80,6 +80,7 @@ function labApp() {
         timeTo: '--',
         timeFrom: '--',
         totalPing: '--',
+        lastJsonSnapshot: "",
 
         canvas: null,
         ctx: null,
@@ -173,6 +174,50 @@ function labApp() {
                 }
             });
             this.points = list;
+        },
+
+        // подтягиваем актуальные точки в json
+        syncPoints() {
+            if (this.isLoading || !this.isServerOnline) return;
+
+            fetch('controller', {
+                method: 'GET',
+                headers: { 'Accept': 'application/json' },
+                cache: 'no-store'
+            })
+                .then(res => {
+                    if (!res.ok) throw new Error("sync error");
+                    return res.text();
+                })
+                .then(jsonText => {
+                    if (this.lastJsonSnapshot === jsonText) return;
+                    this.lastJsonSnapshot = jsonText;
+
+                    const data = JSON.parse(jsonText);
+                    this.points = data.map(pt => ({
+                        x: pt.x,
+                        y: pt.y,
+                        r: pt.r,
+                        hit: pt.hit
+                    }));
+
+                    const tbody = document.getElementById("results-body");
+                    if (tbody) {
+                        tbody.innerHTML = data.map(pt => `
+                            <tr>
+                                <td>${Number(pt.x).toFixed(2)}</td>
+                                <td>${Number(pt.y).toFixed(2)}</td>
+                                <td>${pt.r}</td>
+                                <td class="${pt.hit ? 'hit-true' : 'hit-false'}">${pt.hit ? 'Есть пробитие' : 'Промазал'}</td>
+                                <td>${pt.currentTime}</td>
+                                <td>${pt.executionTimeMicro}</td>
+                            </tr>
+                        `).join("");
+                    }
+
+                    this.drawArea();
+                })
+                .catch(() => {});
         },
 
         selectR(val) {
@@ -472,7 +517,7 @@ function labApp() {
         // пинг сервера
         pingServer() {
             const sendTime = Date.now();
-            fetch('controller', {method: 'HEAD'})
+            fetch('controller', { method: 'HEAD', cache: 'no-store' })
                 .then(res => {
                     if (!res.ok) throw new Error("offline");
                     const receiveTime = Date.now();
@@ -485,6 +530,9 @@ function labApp() {
                     this.timeTo = Math.max(0, (rtt / 2)).toFixed(1);
                     this.timeFrom = Math.max(0, (rtt / 2)).toFixed(1);
                     this.totalPing = rtt.toFixed(1);
+
+                    // синхронизируем точки
+                    this.syncPoints();
                 })
                 .catch(() => {
                     this.isServerOnline = false;
