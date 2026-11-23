@@ -162,7 +162,7 @@
                         </td>
                         <td><%= String.format(java.util.Locale.US, "%.2f", pt.getY()) %>
                         </td>
-                        <td><%= pt.getR() %>
+                        <td><%= (int) pt.getR() %>
                         </td>
                         <td class="<%= pt.getHit() ? "hit-true" : "hit-false" %>"><%= pt.getHit() ? "Есть пробитие" : "Промазал" %>
                         </td>

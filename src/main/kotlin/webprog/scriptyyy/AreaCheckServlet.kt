@@ -58,7 +58,7 @@ class AreaCheckServlet : HttpServlet() {
                 <tr>
                     <td>${String.format(Locale.US, "%.2f", res.x)}</td>
                     <td>${String.format(Locale.US, "%.2f", res.y)}</td>
-                    <td>${res.r}</td>
+                    <td>${res.r.toInt()}</td>
                     <td class="$hitClass">$hitText</td>
                     <td>${res.currentTime}</td>
                     <td>${res.executionTimeMicro}</td>
