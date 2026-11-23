@@ -1,11 +1,32 @@
 let lastErrorMsg = "";
 let lastFormSoundTime = 0;
 
+// кэш предзагруженных звуков
+const audioCache = {};
+
+// предзагрузка всех аудиофайлов в память браузера
+function preloadSounds() {
+    const soundNames = ['1', '2', '3', 'ok', 'fail'];
+    soundNames.forEach(name => {
+        const audio = new Audio(`sounds/${name}.mp3`);
+        audio.preload = 'auto';
+        audio.load();
+        audioCache[name] = audio;
+    });
+}
+
 // проигрывание звука
 function playSound(name) {
-    const audio = new Audio(`sounds/${name}.mp3`);
-    audio.volume = 0.6;
-    audio.play().catch(() => {});
+    const cached = audioCache[name];
+    if (cached) {
+        const audio = cached.cloneNode();
+        audio.volume = 0.6;
+        audio.play().catch(() => {});
+    } else {
+        const audio = new Audio(`sounds/${name}.mp3`);
+        audio.volume = 0.6;
+        audio.play().catch(() => {});
+    }
 }
 
 // звук ошибки ввода с кулдауном
@@ -66,6 +87,8 @@ function labApp() {
         bgImage: new Image(),
 
         init() {
+            preloadSounds();
+
             this.canvas = document.getElementById("graph");
             this.ctx = this.canvas.getContext("2d");
 
