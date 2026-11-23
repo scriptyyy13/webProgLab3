@@ -94,6 +94,17 @@ main {
     letter-spacing: 0.5px;
 }
 
+.server-loading {
+    background-color: #fffaf0;
+    border: 1px solid #fbd38d;
+    color: #9c4221;
+    padding: 10px;
+    border-radius: 4px;
+    font-size: 13px;
+    margin-bottom: 15px;
+    font-weight: bold;
+}
+
 .status-item {
     margin-bottom: 6px;
     color: #718096;

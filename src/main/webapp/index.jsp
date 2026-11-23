@@ -112,6 +112,14 @@
                         <!-- баннер ошибки сервера -->
                         <div id="server-error-banner" class="server-error" style="display: none;"></div>
 
+                        <!-- желтый баннер ожидания ответа -->
+                        <div id="server-loading-banner"
+                             class="server-loading"
+                             :style="isLoading ? 'display: block !important;' : 'display: none !important;'"
+                             style="display: none;">
+                            Идет обработка запроса, пожалуйста, подождите...
+                        </div>
+
                         <div class="buttons-group">
                             <button type="submit" class="btn-submit">Проверить</button>
                             <!-- кнопка очистки истории -->

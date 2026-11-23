@@ -5,8 +5,7 @@ let lastFormSoundTime = 0;
 function playSound(name) {
     const audio = new Audio(`sounds/${name}.mp3`);
     audio.volume = 0.6;
-    audio.play().catch(() => {
-    });
+    audio.play().catch(() => {});
 }
 
 // звук ошибки ввода с кулдауном
@@ -15,7 +14,7 @@ function playFormErrorSound() {
     if (now - lastFormSoundTime < 300) return;
     lastFormSoundTime = now;
 
-    const randomNum = Math.floor(Math.random() * 2) + 2;
+    const randomNum = Math.floor(Math.random() * 3) + 1;
     playSound(randomNum);
 }
 
@@ -47,6 +46,13 @@ function labApp() {
         yError: false,
         rError: false,
         points: [],
+
+        // переменные ожидания ответа
+        isLoading: false,
+        pendingPoint: null,
+        pulseAngle: 0,
+        animFrameId: null,
+        requestStartTime: 0,
 
         isServerOnline: false,
         serverStatusText: 'Проверка...',
@@ -91,10 +97,17 @@ function labApp() {
                         playSound('fail');
                     }
 
+                    // вычисляем сколько времени прошло с момента клика
+                    const elapsed = Date.now() - this.requestStartTime;
+                    const remainingDelay = Math.max(0, 300 - elapsed); // ждем остаток до 300 мс
+
+                    // выключаем индикацию и обновляем точки только после 300 мс
                     setTimeout(() => {
+                        this.isLoading = false;
+                        this.pendingPoint = null;
                         this.syncPointsFromTable();
                         this.drawArea();
-                    }, 10);
+                    }, remainingDelay);
                 }
             });
 
@@ -102,11 +115,17 @@ function labApp() {
             document.body.addEventListener('htmx:sendError', () => {
                 this.isServerOnline = false;
                 this.serverStatusText = 'Недоступен';
+                this.isLoading = false;
+                this.pendingPoint = null;
+                this.drawArea();
                 showServerError("Сервер недоступен. Ошибка отправки запроса.");
             });
 
             // сервер вернул ошибку
             document.body.addEventListener('htmx:responseError', (evt) => {
+                this.isLoading = false;
+                this.pendingPoint = null;
+                this.drawArea();
                 showServerError("Ошибка сервера: код " + evt.detail.xhr.status);
             });
 
@@ -148,7 +167,24 @@ function labApp() {
             this.yError = false;
         },
 
-        // проверка полей перед отправкой
+        // запуск цикла пульсации точки
+        startPulseAnimation() {
+            if (this.animFrameId) return;
+
+            const animate = () => {
+                if (!this.pendingPoint) {
+                    cancelAnimationFrame(this.animFrameId);
+                    this.animFrameId = null;
+                    this.drawArea();
+                    return;
+                }
+                this.pulseAngle += 0.08;
+                this.drawArea();
+                this.animFrameId = requestAnimationFrame(animate);
+            };
+            this.animFrameId = requestAnimationFrame(animate);
+        },
+
         validateForm(e) {
             // клик по очистке не валидируем
             if (e && e.detail && e.detail.elt && e.detail.elt.classList.contains("btn-clear")) {
@@ -194,6 +230,10 @@ function labApp() {
                 if (e) e.preventDefault();
                 return false;
             }
+
+            // включаем плашку загрузки
+            this.isLoading = true;
+            this.requestStartTime = Date.now();
             return true;
         },
 
@@ -203,6 +243,10 @@ function labApp() {
             this.yError = false;
             this.rError = false;
             showServerError(null);
+
+            // показываем плашку загрузки
+            this.isLoading = true;
+            this.requestStartTime = Date.now();
             this.drawArea();
         },
 
@@ -230,6 +274,12 @@ function labApp() {
             const rNum = parseFloat(this.r);
             const mathX = (((clickX - centerX) / this.scale) * rNum).toFixed(2);
             const mathY = (((centerY - clickY) / this.scale) * rNum).toFixed(2);
+
+            // включаем индикацию ожидания
+            this.isLoading = true;
+            this.requestStartTime = Date.now();
+            this.pendingPoint = { x: parseFloat(mathX), y: parseFloat(mathY) };
+            this.startPulseAnimation();
 
             htmx.ajax('POST', 'controller', {
                 values: {x: mathX, y: mathY, r: this.r},
@@ -368,6 +418,32 @@ function labApp() {
                 ctx.lineWidth = 1;
                 ctx.stroke();
             });
+
+            // рисуем пульсирующую пурпурную точку пока ждем ответ
+            if (this.pendingPoint) {
+                const px = centerX + (this.pendingPoint.x / r) * this.scale;
+                const py = centerY - (this.pendingPoint.y / r) * this.scale;
+
+                const baseRadius = 4;
+                const pulseOffset = Math.sin(this.pulseAngle) * 2;
+                const dynamicRadius = Math.max(2, baseRadius + pulseOffset);
+                const haloAlpha = 0.3 + Math.sin(this.pulseAngle) * 0.2;
+
+                // полупрозрачная обводка
+                ctx.beginPath();
+                ctx.arc(px, py, dynamicRadius + 4, 0, 2 * Math.PI);
+                ctx.fillStyle = `rgba(128, 90, 213, ${Math.max(0.1, haloAlpha)})`;
+                ctx.fill();
+
+                // основная точка
+                ctx.beginPath();
+                ctx.arc(px, py, dynamicRadius, 0, 2 * Math.PI);
+                ctx.fillStyle = "#805ad5";
+                ctx.fill();
+                ctx.strokeStyle = "#ffffff";
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+            }
         },
 
         // пинг сервера
