@@ -112,6 +112,7 @@ function labApp() {
 
             // обработка ответа от сервера
             document.body.addEventListener('htmx:afterOnLoad', (evt) => {
+                if (evt.detail.xhr && evt.detail.xhr.status >= 400) return;
                 if (evt.detail.target && evt.detail.target.id === 'results-body') {
                     showServerError(null);
 
