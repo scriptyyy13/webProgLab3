@@ -42,6 +42,8 @@ function playFormErrorSound() {
 // показ и скрытие плашки ошибки
 function showServerError(msg) {
     const errBanner = document.getElementById("server-error-banner");
+    errBanner.textContent = msg;
+    errBanner.style.setProperty("display", "block", "important");
     if (!errBanner) return;
 
     if (msg) {
@@ -529,7 +531,9 @@ function labApp() {
 
                     this.isServerOnline = true;
                     this.serverStatusText = 'Доступен';
-                    showServerError(null);
+                    if (lastErrorMsg.includes("недоступен") || lastErrorMsg.includes("разорвано")) {
+                        showServerError(null);
+                    }
 
                     this.timeTo = Math.max(0, (rtt / 2)).toFixed(1);
                     this.timeFrom = Math.max(0, (rtt / 2)).toFixed(1);
