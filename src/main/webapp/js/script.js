@@ -150,7 +150,11 @@ function labApp() {
                 this.isLoading = false;
                 this.pendingPoint = null;
                 this.drawArea();
-                showServerError("Ошибка сервера: код " + evt.detail.xhr.status);
+                if (evt.detail.xhr.status === 429) {
+                    showServerError("Лимит исчерпан: максимум 25 точек в минуту.");
+                } else {
+                    showServerError("Ошибка сервера: код " + evt.detail.xhr.status);
+                }
             });
 
             this.pingServer();

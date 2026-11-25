@@ -5,7 +5,9 @@ import jakarta.servlet.http.HttpServlet
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import java.util.Locale
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
+import java.util.concurrent.atomic.AtomicInteger
 
 @WebServlet(name = "AreaCheckServlet", urlPatterns = ["/check"])
 class AreaCheckServlet : HttpServlet() {
@@ -24,6 +26,31 @@ class AreaCheckServlet : HttpServlet() {
         }
     }
 
+    // достаем мапу со временем запросов по ip
+    @Suppress("UNCHECKED_CAST")
+    private fun getIpTimestamps(): ConcurrentHashMap<String, MutableList<Long>> {
+        val context = servletContext
+        synchronized(context) {
+            var map = context.getAttribute("ipTimestamps") as? ConcurrentHashMap<String, MutableList<Long>>
+            if (map == null) {
+                map = ConcurrentHashMap()
+                context.setAttribute("ipTimestamps", map)
+            }
+            return map
+        }
+    }
+
+    // получаем реальный ip из заголовков cloudflare или прокси
+    private fun getClientIp(req: HttpServletRequest): String {
+        val cfIp = req.getHeader("cf-connecting-ip")?.trim()
+        if (!cfIp.isNullOrEmpty()) return cfIp
+
+        val xff = req.getHeader("X-Forwarded-For")?.split(",")?.firstOrNull()?.trim()
+        if (!xff.isNullOrEmpty()) return xff
+
+        return req.remoteAddr ?: "unknown"
+    }
+
     override fun doPost(req: HttpServletRequest, resp: HttpServletResponse) {
         val startTime = System.nanoTime()
 
@@ -36,6 +63,27 @@ class AreaCheckServlet : HttpServlet() {
         if (x == null || yValues.isNullOrEmpty() || r == null || x <= -5.0 || x >= 3.0 || r !in 1.0..5.0) {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "некорректные параметры")
             return
+        }
+
+        // проверяем лимит 25 точек в минуту с одного ip
+        val clientIp = getClientIp(req)
+        val timestamps = getIpTimestamps().computeIfAbsent(clientIp) { mutableListOf() }
+        val now = System.currentTimeMillis()
+        val oneMinuteAgo = now - 60_000L
+
+        synchronized(timestamps) {
+            // чистим старые запросы, которые были больше минуты назад
+            timestamps.removeAll { it < oneMinuteAgo }
+
+            if (timestamps.size + yValues.size > 25) {
+                resp.sendError(429, "лимит 25 точек в минуту")
+                return
+            }
+
+            // записываем новые точки в окно
+            repeat(yValues.size) {
+                timestamps.add(now)
+            }
         }
 
         val resultsList = getResultsList()
