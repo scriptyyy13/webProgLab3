@@ -154,7 +154,7 @@ function labApp() {
                 this.pendingPoint = null;
                 this.drawArea();
                 if (evt.detail.xhr.status === 429) {
-                    showServerError("Лимит исчерпан: максимум 25 точек в минуту.");
+                    showServerError("Лимит исчерпан: максимум 5 точек в минуту.");
                 } else {
                     showServerError("Ошибка сервера: код " + evt.detail.xhr.status);
                 }

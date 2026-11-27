@@ -75,8 +75,8 @@ class AreaCheckServlet : HttpServlet() {
             // чистим старые запросы, которые были больше минуты назад
             timestamps.removeAll { it < oneMinuteAgo }
 
-            if (timestamps.size + yValues.size > 25) {
-                resp.sendError(429, "лимит 25 точек в минуту")
+            if (timestamps.size + yValues.size > 5) {
+                resp.sendError(429, "лимит 5 точек в минуту")
                 return
             }
 
